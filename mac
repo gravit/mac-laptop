@@ -58,13 +58,6 @@ else
   sudo chown -R "$LOGNAME:admin" "$HOMEBREW_PREFIX"
 fi
 
-case "$SHELL" in
-  */zsh) : ;;
-  *)
-    fancy_echo "Changing your shell to zsh ..."
-      chsh -s "$(which zsh)"
-    ;;
-esac
 
 gem_install_or_update() {
   if gem list "$1" --installed > /dev/null; then
@@ -95,43 +88,26 @@ fi
 
 fancy_echo "Updating Homebrew formulae ..."
 brew update
+
+# pinned version of mysql
+brew install homebrew/versions/mysql55
+brew services start homebrew/versions/mysql55
+brew link --force homebrew/versions/mysql55
+
 brew bundle --file=- <<EOF
-tap "thoughtbot/formulae"
-tap "homebrew/services"
-
 # Unix
-brew "ctags"
-brew "git"
 brew "openssl"
-brew "rcm"
-brew "reattach-to-user-namespace"
-brew "the_silver_searcher"
 brew "tmux"
-brew "vim"
-brew "zsh"
-
-# Heroku
-brew "heroku-toolbelt"
-brew "parity"
-
-# GitHub
-brew "hub"
 
 # Image manipulation
-brew "imagemagick"
-
-# Testing
-brew "qt"
+brew "qrencode"
 
 # Programming languages
-brew "libyaml" # should come after openssl
-brew "node"
 brew "rbenv"
 brew "ruby-build"
 
 # Databases
-brew "postgres", restart_service: true
-brew "redis", restart_service: true
+# already installed mysql above
 EOF
 
 fancy_echo "Configuring Ruby ..."
@@ -139,7 +115,9 @@ find_latest_ruby() {
   rbenv install -l | grep -v - | tail -1 | sed -e 's/^ *//'
 }
 
-ruby_version="$(find_latest_ruby)"
+# ruby_version="$(find_latest_ruby)"
+# we want a specifc, ancient version of Ruby, not the latest
+ruby_version="1.9.3-p194"
 # shellcheck disable=SC2016
 append_to_zshrc 'eval "$(rbenv init - --no-rehash)"' 1
 eval "$(rbenv init -)"
@@ -151,9 +129,12 @@ fi
 rbenv global "$ruby_version"
 rbenv shell "$ruby_version"
 gem update --system
-gem_install_or_update 'bundler'
+# we're on a specific version of Bundler
+gem_install_or_update 'bundler' -v 1.11.2
+
 number_of_cores=$(sysctl -n hw.ncpu)
 bundle config --global jobs $((number_of_cores - 1))
+
 
 if [ -f "$HOME/.laptop.local" ]; then
   fancy_echo "Running your customizations from ~/.laptop.local ..."
