@@ -1,8 +1,8 @@
 #!/bin/sh
 
-# Welcome to the thoughtbot laptop script!
-# Be prepared to turn your laptop (or desktop, no haters here)
-# into an awesome development machine.
+# Welcome to the Gravit mac-laptop script derived from the
+# thoughtbot laptop script!
+# Be prepared to install some stuff we use on your Mac.
 
 fancy_echo() {
   local fmt="$1"; shift
