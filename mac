@@ -100,6 +100,7 @@ brew "openssl"
 brew "tmux"
 
 # Image manipulation
+brew "imagemagick"
 brew "qrencode"
 
 # Programming languages
